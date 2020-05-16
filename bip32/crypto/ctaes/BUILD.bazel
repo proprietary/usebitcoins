@@ -1,0 +1,13 @@
+cc_library(
+    name = "ctaes",
+    srcs = glob([
+        "ctaes.c",
+        "ctaes.h",
+    ]),
+    hdrs = glob([
+        "ctaes.c",
+        "ctaes.h",
+    ]),
+    include_prefix = "ctaes",
+    visibility = ["//visibility:public"],
+)

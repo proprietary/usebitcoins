@@ -1,0 +1,11 @@
+cc_library(
+    name = "bip32_support",
+    srcs = glob([
+        "**/*.cpp",
+    ]),
+    hdrs = glob([
+        "**/*.h",
+    ]),
+    include_prefix = "support",
+    visibility = ["//visibility:public"],
+)
