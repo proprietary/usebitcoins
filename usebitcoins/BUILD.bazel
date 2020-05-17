@@ -1,11 +1,15 @@
 cc_library(
     name = "usebitcoins",
-    srcs = glob(["*.cpp"]),
+    srcs = [
+        "price_oracle.hpp",
+        "price_oracle.cpp",
+    ],
     includes = [
         "usebitcoins",
     ],
     deps = [
         "@//bip32:bip32",
+        "@boost//:multiprecision",
     ],
     visibility =[  "//visibility:public" ],
 )
@@ -42,6 +46,48 @@ cc_test(
         "@secp256k1//:secp256k1",
         "@com_github_google_googletest//:gtest",
         # "@com_github_google_googletest//:gtest_main",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_test(
+    name = "hash_test",
+    srcs = [
+        "hash.hpp",
+        "hash.cpp",
+        "hash_test.cpp",
+    ],
+    includes = ["."],
+    deps = [
+        "@org_libsodium_libsodium//:sodium",
+        "@boost//:multiprecision",
+        "@com_github_google_googletest//:gtest",
+    ],
+    linkopts = [
+        "-lgmp",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
+cc_test(
+    name = "genaddress_test",
+    srcs = [
+        "hash.cpp",
+        "hash.hpp",
+        "genaddress.hpp",
+        "genaddress.cpp",
+        "genaddress_test.cpp",
+    ],
+    includes = ["."],
+    deps = [
+        "@org_libsodium_libsodium//:sodium",
+        "@boost//:multiprecision",
+        "@com_github_google_googletest//:gtest_main",
+    ],
+    linkopts = [
+        "-lgmp",
     ],
     visibility = ["//visibility:public"],
 )
