@@ -72,6 +72,17 @@ new_local_repository(
     build_file = "//:third_party/libbtc.BUILD",
 )
 
+# Libsodium
+
+http_archive(
+    name = "org_libsodium_libsodium",
+    build_file = "//:third_party/libsodium.BUILD",
+    url = "https://download.libsodium.org/libsodium/releases/libsodium-1.0.18-stable.tar.gz",
+    sha256 = "be151ef8a287cc335469575e53432fc42054aecf2fe5a0e910f2b7cbb6e001ac",
+    patch_cmds = ["./autogen.sh"],
+    strip_prefix = "libsodium-stable",
+)
+
 # Googletest
 
 # http_archive(
