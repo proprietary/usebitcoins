@@ -30,11 +30,11 @@ TEST(HashTest, PackIntoBignumTest) {
 	}
 	std::ostringstream b{};
 	b << std::hex << res;
-	// std::cout << a.str() << std::endl << b.str() << std::endl;
-	ASSERT_TRUE(a.str() == b.str());
-	ASSERT_STREQ(b.str().c_str(),
+	std::cout << a.str() << std::endl << b.str() << std::endl;
+	EXPECT_TRUE(a.str() == b.str());
+	EXPECT_STREQ(b.str().c_str(),
 		     "DBEE7CE79BF5FD700297C5BFB042B2B5C258EBB3DD520E15E47BB8898AA73E1C");
-	ASSERT_STREQ(a.str().c_str(),
+	EXPECT_STREQ(a.str().c_str(),
 		     "DBEE7CE79BF5FD700297C5BFB042B2B5C258EBB3DD520E15E47BB8898AA73E1C");
 }
 

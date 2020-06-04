@@ -33,3 +33,6 @@
 
 # Bazel artifacts
 bazel-*
+
+# CMake binary directory
+build/
