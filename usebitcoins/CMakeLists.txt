@@ -5,6 +5,7 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/third_party/googletest" "third_party/goo
 find_package(Boost 1.69 REQUIRED COMPONENTS system thread)
 find_package(sodium REQUIRED)
 find_package(CURL REQUIRED)
+find_package(RapidJSON REQUIRED)
 
 add_library(usebitcoinslib)
 target_include_directories(usebitcoinslib PUBLIC ".")
@@ -16,8 +17,18 @@ target_sources(usebitcoinslib PUBLIC
 	hash.cpp
 	hash.hpp
 )
-target_link_libraries(usebitcoinslib PUBLIC Boost::headers sodium CURL::libcurl)
-target_compile_features(usebitcoinslib PUBLIC cxx_std_17)
+target_link_libraries(usebitcoinslib PUBLIC Boost::headers sodium curl)
+target_compile_features(usebitcoinslib PUBLIC cxx_std_20)
+
+include(CTest)
+enable_testing()
+include(GoogleTest)
+
+add_executable(usebitcoins_price_oracle_test)
+target_sources(usebitcoins_price_oracle_test PRIVATE price_oracle_test.cpp)
+target_link_libraries(usebitcoins_price_oracle_test PRIVATE usebitcoinslib gtest gtest_main)
+#add_test(NAME usbitcoins_price_oracle_test COMMAND usebitcoins_price_oracle_test)
+gtest_add_tests(TARGET usebitcoins_price_oracle_test)
 
 add_executable(usebitcoins_hash_test)
 target_sources(usebitcoins_hash_test PRIVATE hash_test.cpp)
