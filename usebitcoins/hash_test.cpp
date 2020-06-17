@@ -5,37 +5,61 @@
 #include <memory>
 #include <sodium.h>
 #include <sstream>
-#include <stdlib.h>
+#include <cstdlib>
+#include <algorithm>
+#include <cmath>
+#include <string>
+#include <random>
 
-TEST(HashTest, HashEmailTest) {
-	auto email_hash = hash::hash_email("mail@example.com", 100);
-	// std::cout << email_hash.size() << std::endl;
-	// for (auto ch : email_hash) {
-	//	::printf("%X ", ch);
-	// }
-	// std::cout << std::endl;
-	ASSERT_GT(email_hash.size(), 1);
+namespace {
+
+double shannon_entropy(const uint8_t* const data, size_t n) {
+    double entropy = 0.0;
+    for (auto it = data; it != data + n; ++it) {
+	auto count = static_cast<double>(std::count(data, data + n, *it));
+	auto px = count / n;
+	if (px > 0) {
+	    entropy += -px * std::log2(px);
+	}
+    }
+    return entropy;
 }
 
-TEST(HashTest, PackIntoBignumTest) {
-	using namespace boost::multiprecision;
-	auto email_hash = hash::hash_email("mail@example.com", 32);
-	auto res = hash::pack_byte_array(email_hash);
-	ASSERT_TRUE(res > 0);
-	std::ostringstream a{};
-	char buf[3];
-	for (auto it = email_hash.rbegin(); it != email_hash.rend(); ++it) {
-		::snprintf(&buf[0], 3, "%.2X", *it);
-		a << buf[0] << buf[1];
-	}
-	std::ostringstream b{};
-	b << std::hex << res;
-	std::cout << a.str() << std::endl << b.str() << std::endl;
-	EXPECT_TRUE(a.str() == b.str());
-	EXPECT_STREQ(b.str().c_str(),
-		     "DBEE7CE79BF5FD700297C5BFB042B2B5C258EBB3DD520E15E47BB8898AA73E1C");
-	EXPECT_STREQ(a.str().c_str(),
-		     "DBEE7CE79BF5FD700297C5BFB042B2B5C258EBB3DD520E15E47BB8898AA73E1C");
+
+TEST(HashEmail, HashEmailToIntegerTest) {
+    using usebitcoins::hash::hash_email;
+    EXPECT_GT(hash_email("mail@example.com"), 0UL);
+    EXPECT_EQ(hash_email("mail@example.com"), hash_email("mail@example.com"));
+    EXPECT_NE(hash_email("mail@example.com"), hash_email("noreply@example.com"));
+    EXPECT_GT(hash_email("lol"), 0UL);
+}
+
+TEST(HashEmail, HashEmailToIntegerRandomnessTest) {
+    using usebitcoins::hash::hash_email;
+    using usebitcoins::hash::hash_string;
+    auto hs = hash_string("mail@example.com");
+    auto he = hash_email("mail@example.com");
+    std::array<uint8_t, 8UL> he_bytes;
+    std::memcpy(he_bytes.data(), &he, 8UL);
+    auto string_entropy = shannon_entropy(hs.data(), hs.size());
+    auto int_entropy= shannon_entropy(he_bytes.data(), 8);
+    EXPECT_LT(string_entropy - int_entropy, 4);
+}
+
+TEST(HashEmail, HashEmailTestCollisions) {
+    using usebitcoins::hash::hash_email;
+    auto constexpr iters = 1'000'000'000;
+    std::independent_bits_engine<std::default_random_engine, CHAR_BIT, uint8_t> rand_engine;
+    auto const target = hash_email("mail@example.com");
+    std::string rand_bytes;
+    rand_bytes.resize(20);
+    for (int i = 0; i < iters; ++i) {
+	// generate random string of letters
+	std::generate(rand_bytes.begin(), rand_bytes.end(), [&rand_engine]() {
+	    return rand_engine() % ('z' - 'a') + 'a';
+	});
+	ASSERT_NE(hash_email(rand_bytes), target);
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -45,3 +69,5 @@ int main(int argc, char *argv[]) {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }
+
+} // namespace

@@ -3,7 +3,7 @@
 #include <iostream>
 
 TEST(TestPrefilledAddressGenerator, TestChoosingAddress) {
-    using namespace genaddress;
+    using namespace usebitcoins::genaddress;
     prefilled_address_generator_t a { {"bc1address1", "bc1address2"} };
     auto assigned_addr = a.gen_pub_addr(address_request_t{"mail@example.com"});
     EXPECT_GT(assigned_addr.size(), 0);

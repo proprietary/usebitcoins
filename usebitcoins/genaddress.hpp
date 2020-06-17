@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+namespace usebitcoins {
 namespace genaddress {
 
 struct address_request_t {
@@ -41,5 +42,6 @@ class bip32_address_generator_t : public address_generator_t {
 static constexpr size_t RESOLUTION_BYTES = 2;
 
 } // namespace genaddress
+} // namespace usebitcoins
 
 #endif // _GENADDRESS_HPP
