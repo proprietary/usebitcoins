@@ -96,6 +96,38 @@ git_repository(
     name = "com_github_google_googletest",
     remote = "https://github.com/google/googletest.git",
     commit = "011959aafddcd30611003de96cfd8d7a7685c700",
-    # TODO shallow_since = "",
+    #shallow_since = "1589416565 -0400",
 )
+
+git_repository(
+    name = "com_googlesource_boringssl_boringssl",
+    remote = "https://boringssl.googlesource.com/boringssl",
+    #branch = "master_with_bazel",
+    commit = "597b810379e126ae05d32c1d94b1a9464385acd0",
+    shallow_since = "2020-06-23",
+)
+
+http_archive(
+    name = "com_github_tencent_rapidjson",
+    url = "https://github.com/Tencent/rapidjson/archive/dfbe1db9da455552f7a9ad5d2aea17dd9d832ac1.tar.gz",
+    sha256 = "a2faafbc402394df0fa94602df4b5e4befd734aad6bb55dfef46f62fcaf1090b",
+    build_file = "//:third_party/rapidjson.BUILD",
+)
+
+http_archive(
+    name = "se_haxx_curl_curl",
+    url = "https://curl.haxx.se/download/curl-7.69.1.tar.gz",
+    #sha256 = "62b2b1acee40c4de5a4913e27a4b4194813cf2b7815b73febec7ae53054646ca",
+    strip_prefix = "curl-7.69.1",
+    build_file = "//:third_party/curl.BUILD",
+)
+
+http_archive(
+    name = "net_zlib_zlib",
+    url = "https://zlib.net/zlib-1.2.11.tar.gz",
+    sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
+    strip_prefix = "zlib-1.2.11",
+    build_file = "//:third_party/zlib.BUILD",
+)
+
 

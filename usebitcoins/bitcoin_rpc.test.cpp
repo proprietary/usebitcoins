@@ -1,4 +1,4 @@
-#include <bitcoin_rpc.hpp>
+#include "usebitcoins/bitcoin_rpc.hpp"
 #include <gtest/gtest.h>
 
 // TODO: move all this to an integration test directory

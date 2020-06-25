@@ -1,12 +1,12 @@
+#include "usebitcoins/electrumx_rpc.hpp"
 #include <algorithm>
 #include <array>
-#include <electrumx_rpc.hpp>
 #include <iostream>
 #include <memory>
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
-#include <openssl/x509v3.h>
+#include <openssl/x509_vfy.h>
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
@@ -23,77 +23,35 @@ namespace electrumx_rpc
 namespace
 {
 
+// BIO* BIO_new_ssl(SSL_CTX* ctx, int client)
+// {
+//     BIO* ret;
+//     SSL* ssl;
+
+//     if ((ret = BIO_new(BIO_f_ssl())) == NULL)
+// 	return NULL;
+//     if ((ssl = SSL_new(ctx)) == NULL) {
+// 	BIO_free(ret);
+// 	return NULL;
+//     }
+//     if (client)
+// 	SSL_set_connect_state(ssl);
+//     else
+// 	SSL_set_accept_state(ssl);
+
+//     BIO_set_ssl(ret, ssl, BIO_CLOSE);
+//     return ret;
+// }
+
 static ::rapidjson::MemoryPoolAllocator<::rapidjson::CrtAllocator>
 	rapidjson_allocator{};
-
-auto ssl_ptr(::BIO* const bio) -> ::SSL*
-{
-    SSL* ssl = nullptr;
-    BIO_get_ssl(bio, &ssl);
-    if (ssl == nullptr) {
-	ERR_print_errors_fp(::stderr);
-	throw std::runtime_error{"BIO_get_ssl() error"};
-    }
-    return ssl;
-}
-
-auto verify_certificate(::SSL* ssl, std::string_view host) -> void
-{
-    auto err = ::SSL_get_verify_result(ssl);
-    if (err != X509_V_OK) {
-	auto* s = X509_verify_cert_error_string(err);
-	std::cerr << s << std::endl;
-	// throw std::runtime_error{s};
-    }
-    auto* cert = ::SSL_get_peer_certificate(ssl);
-    if (cert == nullptr) {
-	throw std::runtime_error{"No certificate found"};
-    }
-    if (1 != ::X509_check_host(cert, host.data(), host.size(), 0, nullptr)) {
-	// throw std::runtime_error{"Certificate verification error"};
-    }
-}
-
-static BIO* bio_err = ::BIO_new_fp(::stderr, BIO_NOCLOSE);
 
 auto call(const electrumx_server_params_t& server,
 	  const ::rapidjson::StringBuffer& json_string) -> ::rapidjson::Document
 {
     std::unique_ptr<SSL_CTX, decltype(&::SSL_CTX_free)> ssl_ctx{
 	    ::SSL_CTX_new(TLS_client_method()), &::SSL_CTX_free};
-    // std::unique_ptr<SSL_CTX, decltype(&::SSL_CTX_free)> ssl_ctx{
-    // 	    ::SSL_CTX_new(SSLv23_client_method()), &::SSL_CTX_free};
     ::SSL_CTX_set_default_verify_paths(ssl_ctx.get());
-    ::SSL_CTX_set_info_callback(
-	    ssl_ctx.get(), +[](const SSL* s, int where, int ret) -> void {
-		const char* str;
-		int w = where & ~SSL_ST_MASK;
-
-		if (w & SSL_ST_CONNECT)
-		    str = "SSL_connect";
-		else if (w & SSL_ST_ACCEPT)
-		    str = "SSL_accept";
-		else
-		    str = "undefined";
-
-		if (where & SSL_CB_LOOP) {
-		    BIO_printf(bio_err, "%s:%s\n", str,
-			       SSL_state_string_long(s));
-		} else if (where & SSL_CB_ALERT) {
-		    str = (where & SSL_CB_READ) ? "read" : "write";
-		    BIO_printf(bio_err, "SSL3 alert %s:%s:%s\n", str,
-			       SSL_alert_type_string_long(ret),
-			       SSL_alert_desc_string_long(ret));
-		} else if (where & SSL_CB_EXIT) {
-		    if (ret == 0) {
-			BIO_printf(bio_err, "%s:failed in %s\n", str,
-				   SSL_state_string_long(s));
-		    } else if (ret < 0) {
-			BIO_printf(bio_err, "%s:error in %s\n", str,
-				   SSL_state_string_long(s));
-		    }
-		}
-	    });
     // use OpenSSL's BIO interface as an abstraction over TCP/IP
     std::unique_ptr<::BIO, decltype(&::BIO_free)> bio{
 	    ::BIO_new(::BIO_s_connect()), &::BIO_free};
@@ -114,24 +72,27 @@ auto call(const electrumx_server_params_t& server,
 	throw std::runtime_error{"BIO_do_connect failed"};
     }
     // TLS handshake
-    std::unique_ptr<::BIO, decltype(&::BIO_free)> bio_ssl{
-	    ::BIO_new_ssl(ssl_ctx.get(), 1), &::BIO_free};
-    bio_ssl.reset(BIO_push(bio_ssl.release(), bio.get()));
-    ::SSL_set_tlsext_host_name(ssl_ptr(bio_ssl.get()), server.hostname.c_str());
-    ::SSL_set1_host(ssl_ptr(bio_ssl.get()), server.hostname.c_str());
-    if (auto res = BIO_do_handshake(bio_ssl.get()); res <= 0) {
-	throw std::runtime_error{"Failed TLS handshake"};
+    std::unique_ptr<::SSL, decltype(&::SSL_free)> ssl {::SSL_new(ssl_ctx.get()), &::SSL_free};
+    ::SSL_set_connect_state(ssl.get()); // configures as client
+    // transfer ownership of `bio` to `ssl`
+    auto* bio_ptr = bio.release();
+    ::SSL_set_bio(ssl.get(), bio_ptr, bio_ptr);
+    ::SSL_set_tlsext_host_name(ssl.get(), server.hostname.c_str());
+    // do handshake
+    if (int client_err = ::SSL_get_error(ssl.get(), ::SSL_do_handshake(ssl.get()));
+	client_err != SSL_ERROR_NONE && client_err != SSL_ERROR_WANT_READ &&
+	client_err != SSL_ERROR_WANT_WRITE &&
+	client_err != SSL_ERROR_PENDING_TICKET) {
+	fprintf(stderr, "Client error (%d): %s\n", client_err,
+		::SSL_error_description(client_err));
+	throw std::runtime_error{"Failed ssl handshake"};
     }
-    verify_certificate(ssl_ptr(bio_ssl.get()), server.hostname);
-    // read response
-    std::cout << json_string.GetString() << std::endl;
-    ::BIO_write(bio_ssl.get(), json_string.GetString(), json_string.GetSize());
-    ::BIO_puts(bio_ssl.get(), "\n");
-    BIO_flush(bio_ssl.get());
+    ::SSL_write(ssl.get(), json_string.GetString(), json_string.GetSize());
+    // ElectrumX JSON-RPC requires a newline
+    ::SSL_write(ssl.get(), "\n", 1);
     std::vector<char> raw_response{};
     for (std::array<char, 1024> buf{};;) {
-	size_t read = 0;
-	::BIO_read_ex(bio_ssl.get(), buf.data(), buf.size(), &read);
+	size_t read = ::SSL_read(ssl.get(), buf.data(), buf.size());
 	raw_response.insert(raw_response.end(), buf.begin(),
 			    buf.begin() + read);
 	if (read <= buf.size()) {

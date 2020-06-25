@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <price_oracle.hpp>
+#include "usebitcoins/price_oracle.hpp"
 #include <iostream>
 
 using namespace usebitcoins::price_oracle;

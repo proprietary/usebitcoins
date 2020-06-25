@@ -1,8 +1,11 @@
+#include "usebitcoins/price_oracle.hpp"
+#include "usebitcoins/mozilla_cacert.hpp"
 #include <algorithm>
 #include <curl/curl.h>
 #include <iostream>
 #include <memory>
-#include <price_oracle.hpp>
+#include <openssl/err.h>
+#include <openssl/ssl.h>
 #include <rapidjson/document.h>
 #include <stdexcept>
 #include <string>
@@ -13,6 +16,49 @@ namespace usebitcoins
 {
 namespace price_oracle
 {
+
+namespace
+{
+/// Helper function to use an in-memory CA certificate bundle
+/// https://curl.haxx.se/libcurl/c/cacertinmem.html
+::CURLcode sslctx_function(::CURL* curl, void* sslctx, void* parm)
+{
+    ::CURLcode rv = CURLE_ABORTED_BY_CALLBACK;
+
+    ::BIO* cbio = BIO_new_mem_buf(MOZILLA_CACERT, sizeof(MOZILLA_CACERT));
+    ::X509_STORE* cts = SSL_CTX_get_cert_store((::SSL_CTX*)sslctx);
+    STACK_OF(X509_INFO) * inf;
+    (void)curl;
+    (void)parm;
+
+    if (!cts || !cbio) {
+	return rv;
+    }
+
+    inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
+
+    if (!inf) {
+	BIO_free(cbio);
+	return rv;
+    }
+
+    for (size_t i = 0; i < ::sk_X509_INFO_num(inf); i++) {
+	::X509_INFO* itmp = ::sk_X509_INFO_value(inf, i);
+	if (itmp->x509) {
+	    ::X509_STORE_add_cert(cts, itmp->x509);
+	}
+	if (itmp->crl) {
+	    ::X509_STORE_add_crl(cts, itmp->crl);
+	}
+    }
+
+    ::sk_X509_INFO_pop_free(inf, ::X509_INFO_free);
+    ::BIO_free(cbio);
+
+    rv = CURLE_OK;
+    return rv;
+}
+} // namespace
 
 // Calculate the Bitcoin price as a time-weighted average price (TWAP) or
 // volume-weighted average price (VWAP) over the past 24 hours. Samples of the
@@ -83,6 +129,14 @@ std::string GET_as_string(const char* url)
     std::unique_ptr<CURL, decltype(&::curl_easy_cleanup)> curl_handle{
 	    ::curl_easy_init(), &::curl_easy_cleanup};
     std::string sink{};
+    ::curl_easy_setopt(curl_handle.get(), CURLOPT_SSL_VERIFYPEER, 1);
+    // use in-memory CA cert bundle
+    ::curl_easy_setopt(curl_handle.get(), CURLOPT_SSL_CTX_FUNCTION,
+		       *sslctx_function);
+    ::curl_easy_setopt(curl_handle.get(), CURLOPT_SSLCERTTYPE, "PEM");
+    // do not use system CA cert
+    ::curl_easy_setopt(curl_handle.get(), CURLOPT_CAINFO, nullptr);
+    ::curl_easy_setopt(curl_handle.get(), CURLOPT_CAPATH, nullptr);
     ::curl_easy_setopt(curl_handle.get(), CURLOPT_URL, url);
     ::curl_easy_setopt(curl_handle.get(), CURLOPT_WRITEDATA, &sink);
     curl_write_callback cb = [](char* buffer, size_t size, size_t nmemb,

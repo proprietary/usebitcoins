@@ -1,93 +1,141 @@
 cc_library(
     name = "usebitcoins",
     srcs = [
-        "price_oracle.hpp",
-        "price_oracle.cpp",
+	"electrumx_rpc.hpp",
+	"electrumx_rpc.cpp",
+	"bitcoin_rpc.hpp",
+	"bitcoin_rpc.cpp",
+	"mozilla_cacert.hpp",
+	"price_oracle.hpp",
+	"price_oracle.cpp",
+    ],
+    hdrs = [
+	"electrumx_rpc.hpp",
+	"bitcoin_rpc.hpp",
+	"price_oracle.hpp",
     ],
     includes = [
         "usebitcoins",
     ],
+    copts = ["-std=c++2a"],
+    include_prefix = "usebitcoins",
     deps = [
-        "@//bip32:bip32",
-        "@boost//:multiprecision",
+	"@com_googlesource_boringssl_boringssl//:bssl",
+	"@com_googlesource_boringssl_boringssl//:ssl",
+	"@com_googlesource_boringssl_boringssl//:crypto",
+	"@com_github_tencent_rapidjson//:rapidjson",
+	"@se_haxx_curl_curl//:curl",
+        #"@//bip32:bip32",
+        #"@boost//:multiprecision",
     ],
-    visibility =[  "//visibility:public" ],
+    visibility = ["//visibility:public"],
 )
-
-cc_binary(
-    name = "usebitcoinsd",
-    srcs = [
-        "main.cpp",
-    ],
-    deps = [
-        # ":usebitcoins",
-        "@//bip32:bip32",
-        # "@com_github_libbtc_libbtc//:libbtc",
-        "@secp256k1//:secp256k1",
-        "@boost//:test",
-        "@com_github_google_googletest//:gtest",
-        "@com_github_google_googletest//:gtest_main",
-    ],
-    linkopts = [
-        "-lgmp",
-    ],
-    visibility = [ "//visibility:public" ],
-)
-
 
 cc_test(
-    name = "bip32_test",
-    srcs = [
-        "bip32_test.cpp",
-    ],
+    name = "electrumx_rpc.test",
+    srcs = ["electrumx_rpc.test.cpp"],
     deps = [
-        # "@com_github_libbtc_libbtc//:libbtc",
-        "@//bip32:bip32",
-        "@secp256k1//:secp256k1",
-        "@com_github_google_googletest//:gtest",
-        # "@com_github_google_googletest//:gtest_main",
+	":usebitcoins",
+	"@com_github_google_googletest//:gtest_main",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_test(
+    name = "bitcoin_rpc.test",
+    srcs = ["bitcoin_rpc.test.cpp"],
+    deps = [
+	":usebitcoins",
+	"@com_github_google_googletest//:gtest_main",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_test(
+    name = "price_oracle.test",
+    srcs = ["price_oracle.test.cpp"],
+    deps = [
+	":usebitcoins",
+	"@com_github_google_googletest//:gtest_main",
     ],
     visibility = ["//visibility:public"],
 )
 
 
-cc_test(
-    name = "hash_test",
-    srcs = [
-        "hash.hpp",
-        "hash.cpp",
-        "hash_test.cpp",
-    ],
-    includes = ["."],
-    deps = [
-        "@org_libsodium_libsodium//:sodium",
-        "@boost//:multiprecision",
-        "@com_github_google_googletest//:gtest",
-    ],
-    linkopts = [
-        "-lgmp",
-    ],
-    visibility = ["//visibility:public"],
-)
+# cc_binary(
+#     name = "usebitcoinsd",
+#     srcs = [
+#         "main.cpp",
+#     ],
+#     deps = [
+#         # ":usebitcoins",
+#         "@//bip32:bip32",
+#         # "@com_github_libbtc_libbtc//:libbtc",
+#         "@secp256k1//:secp256k1",
+#         "@boost//:test",
+#         "@com_github_google_googletest//:gtest",
+#         "@com_github_google_googletest//:gtest_main",
+#     ],
+#     linkopts = [
+#         "-lgmp",
+#     ],
+#     visibility = [ "//visibility:public" ],
+# )
 
 
-cc_test(
-    name = "genaddress_test",
-    srcs = [
-        "hash.cpp",
-        "hash.hpp",
-        "genaddress.hpp",
-        "genaddress.cpp",
-        "genaddress_test.cpp",
-    ],
-    includes = ["."],
-    deps = [
-        "@org_libsodium_libsodium//:sodium",
-        "@boost//:multiprecision",
-        "@com_github_google_googletest//:gtest_main",
-    ],
-    linkopts = [
-        "-lgmp",
-    ],
-    visibility = ["//visibility:public"],
-)
+# cc_test(
+#     name = "bip32_test",
+#     srcs = [
+#         "bip32_test.cpp",
+#     ],
+#     deps = [
+#         # "@com_github_libbtc_libbtc//:libbtc",
+#         "@//bip32:bip32",
+#         "@secp256k1//:secp256k1",
+#         "@com_github_google_googletest//:gtest",
+#         # "@com_github_google_googletest//:gtest_main",
+#     ],
+#     visibility = ["//visibility:public"],
+# )
+
+
+# cc_test(
+#     name = "hash_test",
+#     srcs = [
+#         "hash.hpp",
+#         "hash.cpp",
+#         "hash_test.cpp",
+#     ],
+#     includes = ["."],
+#     deps = [
+#         "@org_libsodium_libsodium//:sodium",
+#         "@boost//:multiprecision",
+#         "@com_github_google_googletest//:gtest",
+#     ],
+#     linkopts = [
+#         "-lgmp",
+#     ],
+#     visibility = ["//visibility:public"],
+# )
+
+
+# cc_test(
+#     name = "genaddress_test",
+#     srcs = [
+#         "hash.cpp",
+#         "hash.hpp",
+#         "genaddress.hpp",
+#         "genaddress.cpp",
+#         "genaddress_test.cpp",
+#     ],
+#     includes = ["."],
+#     deps = [
+#         "@org_libsodium_libsodium//:sodium",
+#         "@boost//:multiprecision",
+#         "@com_github_google_googletest//:gtest_main",
+#     ],
+#     linkopts = [
+#         "-lgmp",
+#     ],
+#     visibility = ["//visibility:public"],
+# )
