@@ -1,0 +1,2 @@
+build --cxxopt=-Werror
+build --cxxopt=-std=c++2a
