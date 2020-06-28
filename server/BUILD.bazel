@@ -1,0 +1,10 @@
+# server
+
+cc_binary(
+	name = "uwebsockets",
+	srcs = ["uwebsockets.cpp"],
+	deps = [
+		"@com_github_unetworking_uwebsockets//:uWebSockets",
+	],
+	visibility = ["//visibility:public"],
+)

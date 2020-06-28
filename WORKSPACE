@@ -130,4 +130,34 @@ http_archive(
     build_file = "//:third_party/zlib.BUILD",
 )
 
+http_archive(
+    name = "org_libuv_libuv",
+    url = "https://dist.libuv.org/dist/v1.38.0/libuv-v1.38.0.tar.gz",
+    sha256 = "71344f62c5020ed3643ad0bcba98ae4d7d6037285923c5416844d7c141a3ff93",
+    strip_prefix = "libuv-v1.38.0",
+    build_file = "//:third_party/libuv.BUILD",
+)
 
+
+# http_archive(
+#     name = "org_libuv_libuv",
+#     build_file = "//:third_party/libuv.BUILD",
+#     sha256 = "dfb4fe1ff0b47340978490a14bf253475159ecfcbad46ab2a350c78f9ce3360f",
+#     strip_prefix = "libuv-15ae750151ac9341e5945eb38f8982d59fb99201",
+#     url = "https://github.com/libuv/libuv/archive/15ae750151ac9341e5945eb38f8982d59fb99201.tar.gz",
+# )
+
+new_git_repository(
+	name = "com_github_unetworking_usockets",
+	remote = "https://github.com/uNetworking/uSockets.git",
+	commit = "577c822ac2e27d297eb6ea8712c84db5bbfe3b44",
+	build_file = "//:third_party/uSockets.BUILD",
+)
+
+new_git_repository(
+	name = "com_github_unetworking_uwebsockets",
+	remote = "https://github.com/uNetworking/uWebSockets.git",
+	commit = "c7506a05dc526b94f93702a7fe6dded98fc97db7",
+	shallow_since = "1593325884 +0200",
+	build_file = "//:third_party/uWebSockets.BUILD",
+)
