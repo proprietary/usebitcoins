@@ -10,6 +10,7 @@ find_package(Boost 1.69 REQUIRED COMPONENTS system thread)
 find_package(sodium REQUIRED)
 find_package(CURL REQUIRED)
 find_package(RapidJSON REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 add_library(usebitcoinslib)
 target_include_directories(usebitcoinslib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -20,9 +21,13 @@ target_sources(usebitcoinslib PUBLIC
 	genaddress.hpp
 	hash.cpp
 	hash.hpp
+	bitcoin_rpc.hpp
+	bitcoin_rpc.cpp
+	electrumx_rpc.hpp
+	electrumx_rpc.cpp
 )
 # TODO add rapidjson here
-target_link_libraries(usebitcoinslib PUBLIC Boost::headers sodium curl)
+target_link_libraries(usebitcoinslib PUBLIC Boost::headers sodium curl ${OPENSSL_LIBRARIES})
 target_compile_features(usebitcoinslib PUBLIC cxx_std_20)
 
 add_library(usebitcoins_server)
@@ -52,6 +57,16 @@ add_executable(usebitcoins_libcurl_test)
 target_sources(usebitcoins_libcurl_test PRIVATE libcurl_test.cpp)
 target_link_libraries(usebitcoins_libcurl_test PRIVATE curl gtest gtest_main)
 target_compile_features(usebitcoins_libcurl_test PUBLIC cxx_std_20)
+
+add_executable(usebitcoins_bitcoin_rpc_test)
+target_sources(usebitcoins_bitcoin_rpc_test PRIVATE bitcoin_rpc.hpp bitcoin_rpc_test.cpp)
+target_link_libraries(usebitcoins_bitcoin_rpc_test PRIVATE curl gtest gtest_main usebitcoinslib)
+target_compile_features(usebitcoins_bitcoin_rpc_test PUBLIC cxx_std_20)
+
+add_executable(usebitcoins_electrumx_rpc_test)
+target_sources(usebitcoins_electrumx_rpc_test PRIVATE electrumx_rpc.hpp electrumx_rpc.test.cpp)
+target_link_libraries(usebitcoins_electrumx_rpc_test PRIVATE gtest gtest_main usebitcoinslib)
+target_compile_features(usebitcoins_electrumx_rpc_test PUBLIC cxx_std_20)
 
 add_executable(usebitcoins_config_test)
 target_link_libraries(usebitcoins_config_test PRIVATE usebitcoins_server gtest gtest_main)

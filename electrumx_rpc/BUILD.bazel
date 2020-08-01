@@ -1,0 +1,21 @@
+cc_library(
+    name = "electrumx_rpc",
+    srcs = [
+        "client.hpp",
+    ],
+	hdrs = [
+		"client.hpp",
+	],
+	copts = [
+		"-std=c++20",
+		"-fcoroutines",
+	],
+	defines = [
+		"ASIO_HAS_CO_AWAIT",
+	],
+    deps = [
+        "@com_github_chriskohlhoff_asio//:asio",
+        "@com_googlesource_boringssl_boringssl//:ssl",
+    ],
+    visibility = ["//visibility:public"],
+)

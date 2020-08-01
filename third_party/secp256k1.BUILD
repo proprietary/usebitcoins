@@ -2,10 +2,21 @@ package(default_visibility = ["//visibility:public"])
 
 load("@rules_foreign_cc//tools/build_defs:configure.bzl", "configure_make")
 
+genrule(
+    name = "autogen_sh",
+    outs = [
+        "configure",
+        ],
+    cmd = """
+cat > $@ <<"EOF"
+#!/bin/sh
+./external/secp256k1/autogen.sh >> /dev/null
+EOF"""
+)
+
 filegroup(
     name = "all",
     srcs = glob(["**"]),
-    visibility = ["//visibility:public"],
 )
 
 configure_make(

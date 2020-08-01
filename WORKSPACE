@@ -1,3 +1,5 @@
+workspace(name = "usebitcoins")
+
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
@@ -130,4 +132,18 @@ http_archive(
     build_file = "//:third_party/zlib.BUILD",
 )
 
+http_archive(
+	name = "org_libuv_libuv",
+	url = "https://dist.libuv.org/dist/v1.38.0/libuv-v1.38.0.tar.gz",
+	sha256 = "71344f62c5020ed3643ad0bcba98ae4d7d6037285923c5416844d7c141a3ff93",
+	strip_prefix = "libuv-v1.38.0",
+	build_file = "//:third_party/libuv.BUILD",
+)
 
+new_git_repository(
+	name = "com_github_chriskohlhoff_asio",
+	remote = "https://github.com/chriskohlhoff/asio",
+	commit = "eb7ffb9d226571ce53ff9c088303bae41fcc1650",
+	shallow_since = "1593150160 +1000",
+	build_file = "//:third_party/asio.BUILD",
+)

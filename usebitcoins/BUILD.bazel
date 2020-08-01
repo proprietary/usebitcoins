@@ -25,6 +25,7 @@ cc_library(
 	"@com_googlesource_boringssl_boringssl//:crypto",
 	"@com_github_tencent_rapidjson//:rapidjson",
 	"@se_haxx_curl_curl//:curl",
+	"@org_libuv_libuv//:libuv",
         #"@//bip32:bip32",
         #"@boost//:multiprecision",
     ],
