@@ -38,6 +38,7 @@ cc_library(
         "USE_SCALAR_8X32=1",
         "ECMULT_WINDOW_SIZE=15",
         "ECMULT_GEN_PREC_BITS=8",
+		"ENABLE_MODULE_RECOVERY=1",
     ],
     hdrs = glob([
         "src/*.h",
