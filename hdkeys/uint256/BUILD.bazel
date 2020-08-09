@@ -4,7 +4,11 @@ cc_library(
         "uint256.cpp",
         "uint256.h",
         "strencodings.h",
+        "strencodings.cpp",
         "attributes.h",
+        "tinyformat.h",
+		"span.h",
+        "com_github_bitcoin_util_string.h",
     ],
     hdrs = [
         "uint256.h",

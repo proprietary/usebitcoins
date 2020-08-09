@@ -8,6 +8,7 @@
 #define BITCOIN_PUBKEY_H
 
 #include <hash.h>
+#include <serialize.h>
 #include <uint256.h>
 
 #include <stdexcept>
@@ -127,21 +128,45 @@ public:
                (a.vch[0] == b.vch[0] && memcmp(a.vch, b.vch, a.size()) < 0);
     }
 
+    //! Implement serialization, as if this was a byte vector.
+    template <typename Stream>
+    void Serialize(Stream& s) const
+    {
+        unsigned int len = size();
+        ::WriteCompactSize(s, len);
+        s.write((char*)vch, len);
+    }
+    template <typename Stream>
+    void Unserialize(Stream& s)
+    {
+        unsigned int len = ::ReadCompactSize(s);
+        if (len <= SIZE) {
+            s.read((char*)vch, len);
+            if (len != size()) {
+                Invalidate();
+            }
+        } else {
+            // invalid pubkey, skip available data
+            char dummy;
+            while (len--)
+                s.read(&dummy, 1);
+            Invalidate();
+        }
+    }
 
     //! Get the KeyID of this public key (hash of its serialization)
     CKeyID GetID() const
     {
-        return CKeyID(Hash160(vch, vch + size()));
+        return CKeyID(Hash160(MakeSpan(vch).first(size())));
     }
 
     //! Get the 256-bit hash of this public key.
     uint256 GetHash() const
     {
-        return Hash(vch, vch + size());
+        return Hash(MakeSpan(vch).first(size()));
     }
 
-
-   /*
+    /*
      * Check syntactic correctness.
      *
      * Note that this is consensus critical as CheckSig() calls it!
