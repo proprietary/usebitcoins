@@ -130,4 +130,8 @@ http_archive(
     build_file = "//:third_party/zlib.BUILD",
 )
 
-
+git_repository(
+	name = "com_github_kythe_kythe",
+	remote = "https://github.com/kythe/kythe.git",
+	branch = "master"
+)
