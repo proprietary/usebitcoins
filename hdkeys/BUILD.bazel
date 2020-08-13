@@ -1,12 +1,16 @@
 cc_library(
     name = "hdkeys",
     srcs = [
+        "hdkeygen.hpp",
+        "hdkeygen.cpp",
         "pubkey.h",
         "pubkey.cpp",
         "hash.h",
         "hash.cpp",
 		"key_io.h",
 		"key_io.cpp",
+        "key.h",
+        "key.cpp",
 		"base58.h",
 		"base58.cpp",
         "prevector.h",
@@ -50,6 +54,8 @@ cc_library(
         "crypto/ripemd160.cpp",
         "crypto/sha256.h",
         "crypto/sha256.cpp",
+        "crypto/chacha20.h",
+        "crypto/chacha20.cpp",
         "script/interpreter.h",
         "script/interpreter.cpp",
         "script/script_error.h",
@@ -62,10 +68,14 @@ cc_library(
         "primitives/transaction.h",
         "primitives/block.h",
         "primitives/block.cpp",
+        "support/allocators/secure.h",
+        "support/cleanse.h",
+        "support/cleanse.cpp",
+        "support/lockedpool.h",
+        "support/lockedpool.cpp",
     ],
     hdrs = [
-        "pubkey.h",
-		"key_io.h",
+        "hdkeygen.hpp",
     ],
     deps = [
         "@//hdkeys/uint256:uint256",
@@ -75,7 +85,10 @@ cc_library(
     copts = [
         "-std=c++17",
     ],
-    includes = [".", "compat", "crypto"],
+    linkopts = [
+        "-pthread",
+    ],
+    includes = ["."],
     visibility = ["//visibility:public"],
 )
 
@@ -86,4 +99,16 @@ cc_binary(
         ":hdkeys"
     ],
     visibility = ["//visibility:public"],
+)
+
+
+cc_test(
+	name = "hdkeygen_test",
+	srcs = ["hdkeygen.test.cpp"],
+	deps = [
+		":hdkeys",
+		"@com_github_google_googletest//:gtest",	
+		"@com_github_google_googletest//:gtest_main",
+	],
+	visibility = ["//visibility:public"],
 )
