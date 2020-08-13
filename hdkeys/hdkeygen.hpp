@@ -7,8 +7,10 @@
 #include <memory>
 
 // forward-declare internal Bitcoin Core data structure
+// these are hairy; avoid exposing to clients
 class CExtPubKey;
 enum class OutputType;
+class ECCVerifyHandle;
 
 namespace hdkeys
 {
@@ -33,19 +35,29 @@ enum class chain_t {
 
 class hdkeygen_t {
 private:
+	// pointers to hairy, internal Bitcoin Core data types so that they need not be in header for consumer
 	std::unique_ptr<CExtPubKey> extended_pubkey_;
 	std::unique_ptr<OutputType> output_type_;
+	std::unique_ptr<ECCVerifyHandle> ecc_verify_handle_;
 public:
 	explicit hdkeygen_t(std::string const& extended_pubkey_string);
 
 	~hdkeygen_t() noexcept;
 
+	hdkeygen_t(hdkeygen_t&&) = default;
+
+	hdkeygen_t(hdkeygen_t const&) = default;
+
+	hdkeygen_t& operator=(hdkeygen_t const&) = default;
+
+	hdkeygen_t& operator=(hdkeygen_t&&) = default;
+
 	auto derive(std::vector<hdkey_derivation_edge_t> const& derivation_path) -> std::string;
 
-	// auto derive(std::string const& derivation_path) -> std::string {
-	// 	auto derivation = parse_derivation_path(derivation_path);
-	// 	return derive(derivation);
-	// }
+	auto derive(std::string const& derivation_path) -> std::string {
+		auto derivation = parse_derivation_path(derivation_path);
+		return derive(derivation);
+	}
 };
 
 } // namespace hdkeys

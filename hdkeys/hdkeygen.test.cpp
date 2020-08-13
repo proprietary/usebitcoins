@@ -18,6 +18,30 @@ TEST(HDKeyDerivation, ParseStringDerivationPath) {
 	ASSERT_EQ(res[3].number, 0);
 }
 
+class ExtendedPublicKeyDerivationTest : public ::testing::Test {
+protected:
+	hdkeys::hdkeygen_t* hdkeygen_;
+	
+	void SetUp() override {
+		hdkeygen_ = new hdkeys::hdkeygen_t{"xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8"};
+	}
+
+	void TearDown() override {
+		if (hdkeygen_ != nullptr) {
+			delete hdkeygen_;
+		}
+	}
+};
+
+TEST_F(ExtendedPublicKeyDerivationTest, TestGeneration) {
+	std::string const expected {"13Q3u97PKtyERBpXg31MLoJbQsECgJiMMw"};
+	std::string const path {"0/1"};
+	auto output = hdkeygen_->derive(path);
+	// ::puts(output.c_str());
+	// ::puts(expected.c_str());
+	ASSERT_STREQ(output.c_str(), expected.c_str());
+}
+
 } // namespace
 
 int main(int argc, char** argv) {

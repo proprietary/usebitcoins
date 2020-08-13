@@ -13,6 +13,8 @@
 #include <charconv>
 #include <utility>
 
+
+
 namespace hdkeys
 {
 
@@ -108,11 +110,11 @@ namespace
 
 
 hdkeygen_t::hdkeygen_t(std::string const& extended_pubkey_string) { //bech32
-	(void) ECCVerifyHandle();
+	ecc_verify_handle_ = std::make_unique<ECCVerifyHandle>();
 	ECC_Start();
 	// parse extended key string to get relevant information
 	try {
-		if (extended_pubkey_string.substr(1, 4) != "pub") {
+		if (extended_pubkey_string.substr(1, 3) != "pub") {
 			throw std::runtime_error{"invalid extended public key"};
 		}
 		// https://github.com/satoshilabs/slips/blob/master/slip-0132.md
@@ -176,7 +178,9 @@ hdkeygen_t::hdkeygen_t(std::string const& extended_pubkey_string) { //bech32
 	output_type_ = std::make_unique<OutputType>(OutputType::LEGACY);
 }
 
-hdkeygen_t::~hdkeygen_t() noexcept { ECC_Stop(); }
+hdkeygen_t::~hdkeygen_t() noexcept {
+    ECC_Stop();
+}
 
 auto hdkeygen_t::derive(std::vector<hdkey_derivation_edge_t> const& derivation_path) -> std::string {
 	CExtPubKey next_key = *extended_pubkey_;

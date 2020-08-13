@@ -47,8 +47,6 @@ std::unique_ptr<CBaseChainParams> CreateBaseChainParams(const std::string& chain
 
 void SelectBaseParams(const std::string& chain)
 {
-	std::printf("%p, %d, %d\n", globalChainBaseParams.get(), globalChainBaseParams.get() == nullptr ? 1 : 0, globalChainBaseParams.operator bool() ? 1 : 0);
     globalChainBaseParams = CreateBaseChainParams(chain);
-	std::printf("%p, %d, %d\n", globalChainBaseParams.get(), globalChainBaseParams.get() == nullptr ? 1 : 0, globalChainBaseParams.operator bool() ? 1 : 0);
     // gArgs.SelectConfigNetwork(chain);
 }
