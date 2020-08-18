@@ -37,6 +37,7 @@ TEST_F(ExtendedPublicKeyDerivationTest, TestGeneration) {
 	ASSERT_STREQ(output.c_str(), expected.c_str());
 }
 
+
 } // namespace
 
 int main(int argc, char** argv) {
