@@ -178,8 +178,42 @@ hdkeygen_t::hdkeygen_t(std::string const& extended_pubkey_string) { //bech32
 	output_type_ = std::make_unique<OutputType>(OutputType::LEGACY);
 }
 
+hdkeygen_t::hdkeygen_t(hdkeygen_t&& other) noexcept {
+	extended_pubkey_.swap(other.extended_pubkey_);
+	output_type_.swap(other.output_type_);
+	ecc_verify_handle_.swap(other.ecc_verify_handle_);
+	assert(other.ecc_verify_handle_.get() == nullptr);
+	other.~hdkeygen_t();
+}
+
+hdkeygen_t::hdkeygen_t(hdkeygen_t const& other) {
+	ecc_verify_handle_ = std::make_unique<ECCVerifyHandle>();
+	ECC_Start();
+	extended_pubkey_ = std::make_unique<CExtPubKey>(*other.extended_pubkey_);
+	output_type_ = std::make_unique<OutputType>(*other.output_type_);
+}
+
+hdkeygen_t& hdkeygen_t::operator=(hdkeygen_t const& other) {
+	ecc_verify_handle_ = std::make_unique<ECCVerifyHandle>();
+	ECC_Start();
+	extended_pubkey_ = std::make_unique<CExtPubKey>(*other.extended_pubkey_);
+	output_type_ = std::make_unique<OutputType>(*other.output_type_);
+	return *this;
+}
+
+hdkeygen_t& hdkeygen_t::operator=(hdkeygen_t&& other) noexcept {
+	extended_pubkey_.swap(other.extended_pubkey_);
+	output_type_.swap(other.output_type_);
+	ecc_verify_handle_.swap(other.ecc_verify_handle_);
+	assert(other.ecc_verify_handle_.get() == nullptr);
+	other.~hdkeygen_t();
+	return *this;
+}
+
 hdkeygen_t::~hdkeygen_t() noexcept {
-    ECC_Stop();
+	if (ecc_verify_handle_) {
+		ECC_Stop();
+	}
 }
 
 auto hdkeygen_t::derive(std::vector<hdkey_derivation_edge_t> const& derivation_path) -> std::string {

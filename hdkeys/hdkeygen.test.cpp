@@ -1,5 +1,6 @@
 #include <hdkeygen.hpp>
 #include <gtest/gtest.h>
+#include <memory.h>
 
 namespace
 {
@@ -20,16 +21,10 @@ TEST(HDKeyDerivation, ParseStringDerivationPath) {
 
 class ExtendedPublicKeyDerivationTest : public ::testing::Test {
 protected:
-	hdkeys::hdkeygen_t* hdkeygen_;
+	std::unique_ptr<hdkeys::hdkeygen_t> hdkeygen_;
 	
 	void SetUp() override {
-		hdkeygen_ = new hdkeys::hdkeygen_t{"xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8"};
-	}
-
-	void TearDown() override {
-		if (hdkeygen_ != nullptr) {
-			delete hdkeygen_;
-		}
+		hdkeygen_ = std::make_unique<hdkeys::hdkeygen_t>("xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8");
 	}
 };
 

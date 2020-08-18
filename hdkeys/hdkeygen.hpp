@@ -44,13 +44,13 @@ public:
 
 	~hdkeygen_t() noexcept;
 
-	hdkeygen_t(hdkeygen_t&&) = default;
+	hdkeygen_t(hdkeygen_t&& src) noexcept;
 
-	hdkeygen_t(hdkeygen_t const&) = default;
+	hdkeygen_t(hdkeygen_t const&);
 
-	hdkeygen_t& operator=(hdkeygen_t const&) = default;
+	hdkeygen_t& operator=(hdkeygen_t const&);
 
-	hdkeygen_t& operator=(hdkeygen_t&&) = default;
+	hdkeygen_t& operator=(hdkeygen_t&&) noexcept;
 
 	auto derive(std::vector<hdkey_derivation_edge_t> const& derivation_path) -> std::string;
 
