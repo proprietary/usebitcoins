@@ -4,6 +4,7 @@
 	<title>Alpaca, open source Bitcoin payment processor</title>
 	<meta name="description" content="Alpaca is free libre open source (FOSS) payment processing software for accepting Bitcoin payments online.">
   </head>
+  <link rel="stylesheet" href="/styles/index.css">
   <body>
 	<header>
 	  <h1>Alpaca</h1>
@@ -15,9 +16,36 @@
 		  <h2>Who is this for?</h2>
 		</header>
 		<article>
-		  Alpaca is made for developers. It intends to be what Stripe
-		  is for accepting Bitcoin online.
+		  Alpaca is made for developers. It ships a server and client
+		  SDK to easily integrate Bitcoin payments into a website or
+		  app. Alpaca intends to be like Stripe but for Bitcoin.
 		</article>
+	  </section>
+	  <section>
+		<header>
+		  <h2>Features</h2>
+		</header>
+		<article>
+		  <ul>
+			<li>Free and open source software.</li>
+			<li>Get paid directly into your wallet. No third parties. Non-custodial. No third parties touch your coins.</li>
+			<li>Easy-to-use SDK to integrate Alpaca payments from several programming languages</li>
+			<li>No need to run a fullnode&mdash;communicates with Electrum servers by default</li>
+			<li>Embedded SPV implementation verifies transactions trustlessly</li>
+			<li>Fresh addresses for every transaction</li>
+			<li>BIP-32 address generation; implements heirarchical deterministic key derivation</li>
+			<li>Implemented as a lightweight C++ server</li>
+			<li>Cloud-native&mdash;suitable for cheap cloud deployments (<$5/month total cost of ownership)</li>
+		  </ul>
+		</article>
+	  </section>
+	  <footer>
+		&copy;<span id="current_year">2020</span> Zelly Snyder and
+		Alpaca
+		developers. <a href="https://creativecommons.org/licenses/by-nc/2.0/legalcode">CC
+		BY-NC 2.0</a>
+	  </footer>
 	</main>
+	<script src="/js/index.js" defer></script>
   </body>
 </html>

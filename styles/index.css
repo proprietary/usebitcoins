@@ -1,0 +1,8 @@
+* {
+	padding: 0;
+}
+
+#main {
+	display: grid;
+	grid-template-rows: 2fr 2fr 2fr;
+}
