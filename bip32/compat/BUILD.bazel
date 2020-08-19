@@ -1,7 +1,0 @@
-cc_library(
-    name = "compat",
-    srcs = glob(["*.cpp"]),
-    hdrs = glob(["*.h"]),
-    include_prefix = "compat",
-    visibility = ["//visibility:public"],
-)
